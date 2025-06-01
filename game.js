@@ -9,6 +9,7 @@ window.addEventListener('load', () => {
         width: 800,
         height: 600,
         background: [74, 74, 74],    // Gray background
+        gravity: 980,               // Add gravity
     })
 
     // add a character to screen
@@ -18,16 +19,19 @@ window.addEventListener('load', () => {
         color(255, 0, 0),           // Red color
         area(),                     // For collisions
         body(),                     // For physics
+        {
+            isJumping: false,
+        },
     ])
 
     // Function to create a platform
     function addPlatform(xPos, yPos, width) {
-        add([
+        return add([
             rect(width, 20),         // Platform size (height is 20)
             pos(xPos, yPos),         // Position
             color(0, 255, 0),       // Green color
             area(),                 // For collisions
-            "platform",             // Tag for collision
+            solid(),                // Make platform solid
         ])
     }
 
@@ -42,14 +46,9 @@ window.addEventListener('load', () => {
     addPlatform(100, height() - 350, 200)    // Upper left platform
     addPlatform(500, height() - 350, 200)    // Upper right platform
 
-    // Make platforms solid
-    player.onCollide("platform", () => {
-        player.isGrounded = true
-    })
-
-    // Movement controls with velocity for smoother movement
+    // Movement controls
     const SPEED = 200
-    const JUMP_FORCE = 400
+    const JUMP_FORCE = 550
 
     onKeyDown("left", () => {
         player.move(-SPEED, 0)
@@ -60,9 +59,8 @@ window.addEventListener('load', () => {
     })
 
     onKeyPress("space", () => {
-        if (player.isGrounded) {
+        if (player.isGrounded()) {
             player.jump(JUMP_FORCE)
-            player.isGrounded = false
         }
     })
 
@@ -70,7 +68,6 @@ window.addEventListener('load', () => {
     player.onUpdate(() => {
         if (player.pos.y > height() + 100) {
             player.pos = vec2(width()/2, height()/2)
-            player.isGrounded = false
         }
     })
 }); 
