@@ -12,43 +12,48 @@ window.addEventListener('load', () => {
         gravity: 980,               // Add gravity
     })
 
-    // add a character to screen
+    // add player
     const player = add([
         rect(40, 40),                // Bigger rectangle for better visibility
-        pos(center()),               // Start in center of screen
+        pos(120, 80),               // Start position
         color(255, 0, 0),           // Red color
         area(),                     // For collisions
         body(),                     // For physics
-        {
-            isJumping: false,
-        },
     ])
 
-    // Function to create a platform
-    function addPlatform(xPos, yPos, width) {
-        return add([
-            rect(width, 20),         // Platform size (height is 20)
-            pos(xPos, yPos),         // Position
-            color(0, 255, 0),       // Green color
-            area(),                 // For collisions
-            solid(),                // Make platform solid
-        ])
-    }
+    // add ground
+    add([
+        rect(width(), 48),
+        pos(0, height() - 48),
+        color(0, 255, 0),
+        area(),
+        "platform"
+    ])
 
-    // Add multiple platforms
-    // Ground platform
-    addPlatform(0, height() - 20, width())
+    // add platforms
+    add([
+        rect(200, 20),
+        pos(300, height() - 200),
+        color(0, 255, 0),
+        area(),
+        "platform"
+    ])
 
-    // Floating platforms
-    addPlatform(100, height() - 150, 200)    // Left platform
-    addPlatform(500, height() - 150, 200)    // Right platform
-    addPlatform(300, height() - 250, 200)    // Middle platform
-    addPlatform(100, height() - 350, 200)    // Upper left platform
-    addPlatform(500, height() - 350, 200)    // Upper right platform
+    add([
+        rect(200, 20),
+        pos(100, height() - 300),
+        color(0, 255, 0),
+        area(),
+        "platform"
+    ])
 
-    // Movement controls
+    // handle collisions
+    player.onCollide("platform", () => {
+        player.isGrounded = true
+    })
+
+    // movement
     const SPEED = 200
-    const JUMP_FORCE = 550
 
     onKeyDown("left", () => {
         player.move(-SPEED, 0)
@@ -59,15 +64,17 @@ window.addEventListener('load', () => {
     })
 
     onKeyPress("space", () => {
-        if (player.isGrounded()) {
-            player.jump(JUMP_FORCE)
+        if (player.isGrounded) {
+            player.jump(350)
+            player.isGrounded = false
         }
     })
 
-    // Reset player position if they fall off
+    // reset if fall
     player.onUpdate(() => {
         if (player.pos.y > height() + 100) {
-            player.pos = vec2(width()/2, height()/2)
+            player.pos = vec2(120, 80)
+            player.isGrounded = false
         }
     })
 }); 
