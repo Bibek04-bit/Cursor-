@@ -5,60 +5,72 @@ window.addEventListener('load', () => {
     console.log("Window loaded, initializing game...");
     
     // Initialize the game
-    kaboom({
+    const k = kaboom({
         width: 800,
         height: 600,
-        background: [ 0, 0, 255 ],  // Blue background to make it obvious if it's working
-    });
-    
-    console.log("Kaboom initialized!");
+        background: [74, 74, 74],    // Gray background
+    })
 
-    // Add the player
+    // add a character to screen
     const player = add([
-        rect(32, 32),  // smaller rectangle for player
-        pos(center()),
-        area(),
-        body(),
-        color(255, 0, 0),  // red color
-    ]);
+        rect(40, 40),                // Bigger rectangle for better visibility
+        pos(center()),               // Start in center of screen
+        color(255, 0, 0),           // Red color
+        area(),                     // For collisions
+        body(),                     // For physics
+    ])
 
-    // Add a platform
-    add([
-        rect(width(), 48),
-        pos(0, height() - 48),
-        area(),
-        solid(),
-        color(0, 255, 0),  // green color
-    ]);
+    // Function to create a platform
+    function addPlatform(xPos, yPos, width) {
+        add([
+            rect(width, 20),         // Platform size (height is 20)
+            pos(xPos, yPos),         // Position
+            color(0, 255, 0),       // Green color
+            area(),                 // For collisions
+            "platform",             // Tag for collision
+        ])
+    }
 
-    // Movement controls
+    // Add multiple platforms
+    // Ground platform
+    addPlatform(0, height() - 20, width())
+
+    // Floating platforms
+    addPlatform(100, height() - 150, 200)    // Left platform
+    addPlatform(500, height() - 150, 200)    // Right platform
+    addPlatform(300, height() - 250, 200)    // Middle platform
+    addPlatform(100, height() - 350, 200)    // Upper left platform
+    addPlatform(500, height() - 350, 200)    // Upper right platform
+
+    // Make platforms solid
+    player.onCollide("platform", () => {
+        player.isGrounded = true
+    })
+
+    // Movement controls with velocity for smoother movement
+    const SPEED = 200
+    const JUMP_FORCE = 400
+
     onKeyDown("left", () => {
-        player.move(-200, 0)
-    });
+        player.move(-SPEED, 0)
+    })
 
     onKeyDown("right", () => {
-        player.move(200, 0)
-    });
+        player.move(SPEED, 0)
+    })
 
     onKeyPress("space", () => {
-        if (player.isGrounded()) {
-            player.jump(400)
+        if (player.isGrounded) {
+            player.jump(JUMP_FORCE)
+            player.isGrounded = false
         }
-    });
+    })
 
-    // Keep player in bounds
+    // Reset player position if they fall off
     player.onUpdate(() => {
-        // Wrap horizontally
-        if (player.pos.x < 0) {
-            player.pos.x = width();
-        }
-        if (player.pos.x > width()) {
-            player.pos.x = 0;
-        }
-        
-        // Reset if fallen
         if (player.pos.y > height() + 100) {
-            player.pos = vec2(center());
+            player.pos = vec2(width()/2, height()/2)
+            player.isGrounded = false
         }
-    });
+    })
 }); 
